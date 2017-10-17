@@ -1,0 +1,319 @@
+<!DOCTYPE html><html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<div id="colordiv"></div>
+<div id="main">
+<strong>Welcome to WordClock</strong>
+<hr class="index">
+<table style="width:400px">
+  <tr>
+    <td id="sTim" style="width:60px" rowspan="2" class="btn btn--s btn--blue">Set</td>
+    <td style="width:25px; text-align:right">Date:</td>
+    <td id="curDate" style="width:200px; text-align:center">polling</td>
+  </tr>
+  <tr>
+    <td style="width:25px; text-align:right">Time:</td>
+    <td id="curTime" style="width:200px; text-align:center">polling</td>
+  </tr>
+</table>
+<br>
+<br>
+<table style="width:400px">
+  <strong>Brightness</strong>
+  <tr>
+    <td id="sBri" style="width:80px" class="btn btn--s btn--blue">Set</td>
+    <td><input type="range" id="Bri" value="90" style="width:200px" max="250"></td>
+    <td id="bBri" style="width:100px; align:left" class="box"></td>
+  </tr>
+</table>
+<br>
+<br>
+<table style="width:400px">
+  <strong>Color Picker</strong>
+  <tr>
+    <td id="sCol" style="width:80px" class="btn btn--s btn--blue">Set</td>
+    <td id="pCol" style="width:300px" class="box">click me!</td>
+  </tr>
+</table>
+<table style="width:400px">
+  <tr></tr>
+  <tr style="height:50px">
+    <td>RED</td>
+    <td><input type="range" id="rSli" style="width:200px" max="250"></td>
+    <td id="brSli" style="width:100px; align:left" class="box"></td>
+  </tr>
+  <tr></tr>
+  <tr style="height:50px">
+    <td>GRN</td>
+    <td><input type="range" id="gSli" style="width:200px" max="250"></td>
+    <td id="bgSli" style="width:100px; align:left" class="box"></td>
+  </tr>
+  <tr></tr>
+  <tr style="height:50px">
+    <td>BLU</td>
+    <td><input type="range" id="bSli" style="width:200px" max="250"></td>
+    <td id="bbSli" style="width:100px; align:left" class="box"></td>
+  </tr>
+</table>
+<br>
+<br>
+<table style="width:400px">
+  <strong>Animate</strong>
+  <tr>
+    <td id="anim" style="width:100px; align:left"></td>
+  </tr>
+</table>
+</div>
+</html>
+
+
+
+
+
+<script language="javascript" type="text/javascript">
+
+  var briVal, rVal, gVal, bVal, hexVal, sendFlag;
+  var bri = document.getElementById("Bri");
+  var bbri = document.getElementById("bBri");
+  var rsli = document.getElementById("rSli");
+  var brsli = document.getElementById("brSli");
+  var gsli = document.getElementById("gSli");
+  var bgsli = document.getElementById("bgSli");
+  var bsli = document.getElementById("bSli");
+  var bbsli = document.getElementById("bbSli");
+  var sTim = document.getElementById("sTim");
+  var mt = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"] ;
+  var mtdy = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+  function startTime(res) {
+
+    if (!res || (res.target.responseText == "[]")) {
+      setTimeout(function () { startTime(); }, 5000);
+      document.getElementById("curDate").innerHTML = "polling";
+      document.getElementById("curTime").innerHTML = "polling";
+      return;
+    }
+    var resp = JSON.parse(res.target.responseText);
+
+
+    document.getElementById("curDate").innerHTML = resp[0].yr + " / " + mt[(resp[0].mn)-1] + " / " + resp[0].dy;
+    document.getElementById("curTime").innerHTML = resp[0].hh + " : " + checkTime(resp[0].mm) ;
+  }
+  function checkTime(i) {
+    if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+    return i;
+  }
+
+  function updateHex(){
+    rgbToHex(rsli.value, gsli.value, bsli.value);
+    document.getElementById("pCol").style.backgroundColor = "#" + hexVal;
+    document.getElementById("pCol").innerHTML = "#" + hexVal;
+  }
+  function updateRGB(){
+    hexToRgb(hexVal);
+    rsli.value  = rVal;
+    brsli.innerHTML = rVal;
+    gsli.value  = gVal;
+    bgsli.innerHTML = gVal;
+    bsli.value  = bVal;
+    bbsli.innerHTML = bVal;
+  }
+ function updBri(){
+   briVal = bri.value ;
+   bbri.innerHTML = bri.value;
+ }
+ function updRd(){
+   rVal = rsli.value;
+   brsli.innerHTML = rVal;
+   updateHex();
+ }
+ function updGr(){
+   gVal = gsli.value;
+   bgsli.innerHTML = gVal;
+   updateHex();
+ }
+ function updBl(){
+   bVal = bsli.value;
+   bbsli.innerHTML = bVal;
+   updateHex();
+ }
+ function reqTime(){
+   request = new XMLHttpRequest();
+   if (request) {
+       request.open("GET", "/time", true);
+       request.addEventListener("load", startTime)
+       request.send();
+   }
+ }
+	window.onload = function ()
+	{
+		load("style.css","css", function()
+		{
+			load("microajax.js","js", function()
+			{
+				// Do something after load...
+        reqTime();
+        bri.value = briVal/250 * 100;
+        bbri.innerHTML = briVal/250 * 100;
+        document.getElementById("pCol").style.backgroundColor = hexVal;
+        document.getElementById("pCol").innerHTML = hexVal;
+        rsli.value  = rVal;
+        brsli.innerHTML = rVal;
+        gsli.value  = gVal;
+        bgsli.innerHTML = gVal;
+        bsli.value  = bVal;
+        bbsli.innerHTML = bVal;
+
+        bri.addEventListener("touchstart", updBri);
+        bri.addEventListener("touchmove", updBri);
+        bri.addEventListener("mousemove", updBri);
+        rsli.addEventListener("touchstart", updRd);
+        rsli.addEventListener("touchmove", updRd);
+        rsli.addEventListener("mousemove", updRd);
+        gsli.addEventListener("touchstart", updGr);
+        gsli.addEventListener("touchmove", updGr);
+        gsli.addEventListener("mousemove", updGr);
+        bsli.addEventListener("touchstart", updBl);
+        bsli.addEventListener("touchmove", updBl);
+        bsli.addEventListener("mousemove", updBl);
+        document.getElementById("pCol").addEventListener("click", function(){
+          document.getElementById("main").style.display='none';
+          showPicker();
+        });
+        sTim.addEventListener("click", function(){
+          if(!sendFlag){
+            document.getElementById("curDate").innerHTML = "<input id=\"inDate\" type=\"name\" placeholder=\"yyyy\:mm\:dd\">";
+					  document.getElementById("curTime").innerHTML = "<input id=\"inTime\"type=\"name\" placeholder=\"hh\:mm\">";
+            sendFlag=true;
+          } else if (sendFlag){
+            sendFlag=false;
+            var dstr = document.getElementById("inDate").value;
+            var tstr = document.getElementById("inTime").value;
+            var darr = dstr.split(":");
+            var tarr = tstr.split(":");
+            var iarr = [parseInt(darr[0]),parseInt(darr[1]),parseInt(darr[2]),parseInt(tarr[0]),parseInt(tarr[1])];
+            if(iarr[0]>2001 && iarr[1]>0 && iarr[2]>0 && iarr[3]>0 && iarr[4]>0){
+              if(iarr[1]<13 && iarr[2]<mtdy[iarr[1]-1] && iarr[3]<25 && iarr[4]<60){
+                var params = "yr=" + (iarr[0]-2000) + "&mn=" + darr[1] + "&dy=" + darr[2] + "&hh=" + tarr[0] + "&mm=" + tarr[1] ;
+                //document.getElementById("anim").innerHTML = params;
+                while(!ajaxPost("/time",params)){};
+              }
+            }
+            reqTime();
+          } else {sendFlag=false;}
+        });
+
+        document.getElementById("sCol").addEventListener("click", function(){
+					             sendcolor;
+				});
+			});
+		});
+	}
+	function load(e,t,n) {
+		if("js"==t) {
+			var a=document.createElement("script");
+			a.src=e,
+			a.type="text/javascript",
+			a.async=!1,
+			a.onload=function() { n() },
+			document.getElementsByTagName("head")[0].appendChild(a)
+		}
+		else if("css"==t) {
+			var a=document.createElement("link");
+			a.href=e,
+			a.rel="stylesheet",
+			a.type="text/css",
+			a.async=!1,
+			a.onload=function(){ n() },
+			document.getElementsByTagName("head")[0].appendChild(a)
+		}
+	}
+  function rgbToHex(R,G,B) {
+    hexVal = toHex(R)+toHex(G)+toHex(B);
+  }
+    function toHex(n) {
+      n = parseInt(n,10);
+      if (isNaN(n)) return "00";
+      n = Math.max(0,Math.min(n,255));
+      return "0123456789ABCDEF".charAt((n-n%16)/16) + "0123456789ABCDEF".charAt(n%16);
+    }
+  function hexToRgb(hex) {
+    hex = hex.replace(/[^0-9A-F]/gi, '');
+    var bigint = parseInt(hex, 16);
+    rVal = (bigint >> 16) & 255;
+    gVal = (bigint >> 8) & 255;
+    bVal = bigint & 255;
+  }
+
+  function showPicker() {
+    document.getElementById("colordiv").innerHTML="<canvas id=\"colorspace\" width=\"1px\" height=\"1px\"></canvas>";
+    var canvas = document.getElementById('colorspace');
+    canvas.style.display='initial';
+    var ctx = canvas.getContext('2d');
+
+    function drawCanvas() {
+      var longer, shorter;
+      if(window.innerWidth > window.innerHeight){
+        var colours = ctx.createLinearGradient(0, 0, window.innerWidth, 0);
+        var luminance = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+      } else {
+        var colours = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+        var luminance = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+      }
+      //var colours = ctx.createLinearGradient(0, 0, longer, 0);
+      //for(var i=0; i <= 360; i+=64) {
+      //  colours.addColorStop(i/360, 'hsl(' + i + ', 100%, 50%)');
+      //}
+      colours.addColorStop(0,"WHITE");
+      colours.addColorStop(0.05,"WHITE");
+      colours.addColorStop(0.2,"RED");
+      colours.addColorStop(0.3,"ORANGE");
+      colours.addColorStop(0.55,"YELLOW");
+      colours.addColorStop(0.65,"GREEN");
+      colours.addColorStop(0.7,"BLUE");
+      //colours.addColorStop(0.8,"VIOLET");
+      colours.addColorStop(0.9,"VIOLET");
+      colours.addColorStop(1,"PINK");
+      ctx.fillStyle = colours;
+      ctx.fillRect(10, 10, window.innerWidth-50, window.innerHeight-50);
+      //var luminance = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+      luminance.addColorStop(0, '#ffffff');
+      luminance.addColorStop(0.05, '#ffffff');
+      luminance.addColorStop(0.4, 'rgba(0,0,0,0)');
+      luminance.addColorStop(0.95, '#000000');
+      luminance.addColorStop(1, '#000000');
+      ctx.fillStyle = luminance;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+    var eventLocked = false;
+    function handleEvent(clientX, clientY) {
+      if(eventLocked) {
+        return;
+      }
+      var data = ctx.getImageData(clientX, clientY, 1, 1).data;
+      rVal = data[0];
+      gVal = data[1];
+      bVal = data[2];
+      //var params = ['r=' + rVal, 'g=' + gVal, 'b=' + bVal].join('&');
+      document.getElementById("colordiv").innerHTML="";
+      document.getElementById("main").style.display='initial';
+      rgbToHex(rVal, gVal, bVal);
+      document.getElementById("pCol").style.backgroundColor= "#" + hexVal;
+      document.getElementById("pCol").innerHTML= "#" +hexVal;
+      updateRGB();
+    }
+    canvas.addEventListener('click', function(event) {
+      handleEvent(event.clientX, event.clientY, true);
+    }, false);
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawCanvas();
+    }
+    window.addEventListener('resize', resizeCanvas, false);
+    resizeCanvas();
+    drawCanvas();
+    document.ontouchmove = function(e) {e.preventDefault()};
+};
+
+</script>
