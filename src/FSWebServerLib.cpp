@@ -6,7 +6,7 @@
 #include "FSWebServerLib.h"
 #include <StreamString.h>
 
-AsyncFSWebServer ESPHTTPServer(80);
+AsyncFSWebServer Server(80);
 
 const char Page_WaitAndReload[] PROGMEM = R"=====(
 <meta http-equiv="refresh" content="10; URL=/config.html">
@@ -36,7 +36,7 @@ void AsyncFSWebServer::s_secondTick(void* arg) {
         self->sendTimeData();
     }
 }
-
+/*
 void AsyncFSWebServer::sendTimeData() {
     String data = "{";
     data += "\"time\":\"" + NTP.getTimeStr() + "\",";
@@ -51,7 +51,7 @@ void AsyncFSWebServer::sendTimeData() {
     data = String();
     //DEBUGLOG(__PRETTY_FUNCTION__);
     //DEBUGLOG("\r\n")
-}
+}*/
 
 String formatBytes(size_t bytes) {
     if (bytes < 1024) {

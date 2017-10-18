@@ -11,15 +11,16 @@
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
-#include <TimeLib.h>
-#include <NtpClientLib.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include <ESP8266mDNS.h>
-#include <FS.h>
-#include <Ticker.h>
-#include <ArduinoOTA.h>
-#include <ArduinoJson.h>
+#include "TimeLib.h"
+//#include "NtpClientLib.h"
+#include "ESPAsyncTCP.h"
+#include "ESPAsyncWebServer.h"
+#include "ESP8266mDNS.h"
+#include "FS.h"
+#include "AsyncWebSocket.h"
+#include "Ticker.h"
+#include "ArduinoOTA.h"
+#include "ArduinoJson.h"
 
 #define RELEASE  // Comment to enable debug output
 
@@ -136,6 +137,6 @@ protected:
     static boolean checkRange(String Value);
 };
 
-extern AsyncFSWebServer ESPHTTPServer;
+extern AsyncFSWebServer Server;
 
 #endif // _FSWEBSERVERLIB_h
